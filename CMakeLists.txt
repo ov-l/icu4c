@@ -46,7 +46,7 @@ target_compile_definitions(uc
 
 # Create an export set for the target
 install(TARGETS uc
-  EXPORT icu4cTargets
+  EXPORT ICUTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -60,8 +60,8 @@ install(DIRECTORY common/ i18n/
 )
 
 # Export targets
-install(EXPORT icu4cTargets
-  FILE icu4cTargets.cmake
+install(EXPORT ICUTargets
+  FILE ICUTargets.cmake
   NAMESPACE ICU::
   DESTINATION lib/cmake/ICU
 )
