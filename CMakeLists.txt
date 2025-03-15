@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.10)
-project(ICU VERSION 1.0.0 LANGUAGES CXX)
+project(ICU VERSION 77.1 LANGUAGES CXX)
 
 # Find all source files in common and i18n directories
 file(GLOB_RECURSE ICU_SOURCES
@@ -24,6 +24,7 @@ set_target_properties(uc PROPERTIES
   CXX_STANDARD 20
   CXX_STANDARD_REQUIRED ON
   POSITION_INDEPENDENT_CODE ON
+  VERSION ${PROJECT_VERSION}
 )
 
 target_compile_definitions(uc
