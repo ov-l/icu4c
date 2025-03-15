@@ -50,12 +50,12 @@ install(TARGETS uc
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include/uc
+  INCLUDES DESTINATION include/ICU
 )
 
 # Install headers
 install(DIRECTORY common/ i18n/
-  DESTINATION include/uc
+  DESTINATION include/ICU
   FILES_MATCHING PATTERN "*.h"
 )
 
@@ -63,34 +63,34 @@ install(DIRECTORY common/ i18n/
 install(EXPORT icu4cTargets
   FILE icu4cTargets.cmake
   NAMESPACE ICU::
-  DESTINATION lib/cmake/uc
+  DESTINATION lib/cmake/ICU
 )
 
 # Create config file template
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/icu4cConfig.cmake.in "
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/ICUConfig.cmake.in "
 @PACKAGE_INIT@
-include(\${CMAKE_CURRENT_LIST_DIR}/icu4cTargets.cmake)
+include(\${CMAKE_CURRENT_LIST_DIR}/ICUTargets.cmake)
 check_required_components(uc)
 ")
 
 # Create and install config file
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/icu4cConfig.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/icu4cConfig.cmake
-  INSTALL_DESTINATION lib/cmake/uc
+  ${CMAKE_CURRENT_BINARY_DIR}/ICUConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/ICUConfig.cmake
+  INSTALL_DESTINATION lib/cmake/ICU
 )
 
 # Create and install version file
 write_basic_package_version_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/icu4cConfigVersion.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/ICUConfigVersion.cmake
   VERSION ${PROJECT_VERSION}
   COMPATIBILITY SameMajorVersion
 )
 
 # Install config files
 install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/icu4cConfig.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/icu4cConfigVersion.cmake
-  DESTINATION lib/cmake/uc
+  ${CMAKE_CURRENT_BINARY_DIR}/ICUConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/ICUConfigVersion.cmake
+  DESTINATION lib/cmake/ICU
 )

@@ -44,3 +44,4 @@ CMakeLists.txt.user
 /docs/build
 /docs/xml
 .DS_Store
+/temp

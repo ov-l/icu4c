@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     version = sys.argv[1]
 
-    output_dir = os.curdir
+    output_dir = os.getcwd()
     icu4c_dir = f'{output_dir}/temp/icu/source'
 
     download_icu4c(version)
