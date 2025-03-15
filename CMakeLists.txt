@@ -42,6 +42,8 @@ target_compile_definitions(uc
     "U_ENABLE_DYLOAD=0"
     "U_HAVE_LIB_SUFFIX=1"
     "U_LIB_SUFFIX_C_NAME=_lxe"
+    "U_SHOW_CPLUSPLUS_API=1"
+    "U_SHOW_CPLUSPLUS_HEADER_API=1"
 )
 
 # Create an export set for the target
