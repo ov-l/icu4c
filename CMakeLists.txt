@@ -16,7 +16,7 @@ target_include_directories(uc
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/i18n>
-    $<INSTALL_INTERFACE:include/uc>
+    $<INSTALL_INTERFACE:include>
 )
 
 # Set properties for the target
