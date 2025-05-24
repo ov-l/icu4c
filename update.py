@@ -97,11 +97,13 @@ if __name__ == '__main__':
 
     print('Done updating ICU4C')
 
-    # Open current CMakeListst.txt and update the version
-    with open('CMakeLists.txt', 'r') as file:
+    cmake_lists_path = os.path.join(output_dir, 'CMakeLists.txt')
+
+    # Open current CMakeLists.txt and update the version
+    with open(cmake_lists_path, 'r') as file:
         lines = file.readlines()
 
-    with open('CMakeLists.txt', 'w') as file:
+    with open(cmake_lists_path, 'w') as file:
         for line in lines:
             if 'project(ICU VERSION' in line:
                 file.write(f'project(ICU VERSION {version} LANGUAGES CXX)\n')
