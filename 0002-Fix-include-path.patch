@@ -1,0 +1,25 @@
+From e17951f47cb2a2eb84675671ff6944d210dd1144 Mon Sep 17 00:00:00 2001
+From: obhi-d <obi.de.online@gmail.com>
+Date: Sun, 25 May 2025 00:35:09 +0200
+Subject: [PATCH 2/3] Fix include path
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a43b835..e08afc4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -16,7 +16,7 @@ target_include_directories(uc
+   PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/i18n>
+-    $<INSTALL_INTERFACE:include/uc>
++    $<INSTALL_INTERFACE:include>
+ )
+ 
+ # Set properties for the target
+-- 
+2.45.2.windows.1
+

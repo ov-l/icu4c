@@ -1,0 +1,82 @@
+From 2bd31c1027b8690478a49fb894da9236edf0192a Mon Sep 17 00:00:00 2001
+From: obhi-d <obi.de.online@gmail.com>
+Date: Tue, 27 May 2025 11:52:22 +0200
+Subject: [PATCH 3/3] Patch characters
+
+---
+ common/ucasemap.cpp  |  2 +-
+ common/uchar.cpp     | 12 ++++++------
+ common/ustrcase.cpp  |  2 +-
+ i18n/uspoof_impl.cpp |  2 +-
+ 4 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/common/ucasemap.cpp b/common/ucasemap.cpp
+index 928c524..3ef9122 100644
+--- a/common/ucasemap.cpp
++++ b/common/ucasemap.cpp
+@@ -599,7 +599,7 @@ ucasemap_internalUTF8ToTitle(
+                         c = ~c;
+                     }
+ 
+-                    if (c == u'I' || c == u'Í') {
++                    if (c == u'I' || c == 0xcd) {
+                         titleLimit = maybeTitleDutchIJ(src, c, titleLimit, index, sink, options, edits, errorCode);
+                     }
+                 }
+diff --git a/common/uchar.cpp b/common/uchar.cpp
+index 3b2ae8c..1ae1a1e 100644
+--- a/common/uchar.cpp
++++ b/common/uchar.cpp
+@@ -682,17 +682,17 @@ uchar_addPropertyStarts(const USetAdder *sa, UErrorCode *pErrorCode) {
+     sa->add(sa->set, u'A');
+     sa->add(sa->set, u'Z'+1);
+     // fullwidth
+-    sa->add(sa->set, u'ａ');
+-    sa->add(sa->set, u'ｚ'+1);
+-    sa->add(sa->set, u'Ａ');
+-    sa->add(sa->set, u'Ｚ'+1);
++    sa->add(sa->set, 0xff41); // u'ａ'
++    sa->add(sa->set, 0xff5a + 1); // u'ｚ'
++    sa->add(sa->set, 0xff21); // u'Ａ'
++    sa->add(sa->set, 0xff3a + 1); // u'Ｚ'
+ 
+     /* add for u_isxdigit() */
+     sa->add(sa->set, u'f'+1);
+     sa->add(sa->set, u'F'+1);
+     // fullwidth
+-    sa->add(sa->set, u'ｆ'+1);
+-    sa->add(sa->set, u'Ｆ'+1);
++    sa->add(sa->set, 0xff46+1); // u'ｆ'
++    sa->add(sa->set, 0xff26+1); // u'Ｆ'
+ 
+     /* add for UCHAR_DEFAULT_IGNORABLE_CODE_POINT what was not added above */
+     sa->add(sa->set, 0x2060); /* range 2060..206f */
+diff --git a/common/ustrcase.cpp b/common/ustrcase.cpp
+index 58b5c5e..949b6c2 100644
+--- a/common/ustrcase.cpp
++++ b/common/ustrcase.cpp
+@@ -578,7 +578,7 @@ ustrcase_internalToTitle(int32_t caseLocale, uint32_t options, BreakIterator *it
+                         c = ~c;
+                     }
+ 
+-                    if (c == u'I' || c == u'Í') {
++                    if (c == u'I' || c == 0xcd) {
+                         titleLimit = maybeTitleDutchIJ(src, c, titleStart + 1, index,
+                                                        dest, destIndex, destCapacity, options,
+                                                        edits);
+diff --git a/i18n/uspoof_impl.cpp b/i18n/uspoof_impl.cpp
+index c727faf..81179d5 100644
+--- a/i18n/uspoof_impl.cpp
++++ b/i18n/uspoof_impl.cpp
+@@ -385,7 +385,7 @@ int32_t SpoofImpl::findHiddenOverlay(const UnicodeString& input, UErrorCode&) co
+ }
+ 
+ static inline bool isIllegalCombiningDotLeadCharacterNoLookup(UChar32 cp) {
+-    return cp == u'i' || cp == u'j' || cp == u'ı' || cp == u'ȷ' || cp == u'l' ||
++    return cp == u'i' || cp == u'j' || cp == 0x131 || cp == 0x237 || cp == u'l' ||
+            u_hasBinaryProperty(cp, UCHAR_SOFT_DOTTED);
+ }
+ 
+-- 
+2.45.2.windows.1
+
