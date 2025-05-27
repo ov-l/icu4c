@@ -599,7 +599,7 @@ ucasemap_internalUTF8ToTitle(
                         c = ~c;
                     }
 
-                    if (c == u'I' || c == u'Í') {
+                    if (c == u'I' || c == 0xcd) {
                         titleLimit = maybeTitleDutchIJ(src, c, titleLimit, index, sink, options, edits, errorCode);
                     }
                 }

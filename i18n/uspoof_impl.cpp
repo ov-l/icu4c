@@ -385,7 +385,7 @@ int32_t SpoofImpl::findHiddenOverlay(const UnicodeString& input, UErrorCode&) co
 }
 
 static inline bool isIllegalCombiningDotLeadCharacterNoLookup(UChar32 cp) {
-    return cp == u'i' || cp == u'j' || cp == u'ı' || cp == u'ȷ' || cp == u'l' ||
+    return cp == u'i' || cp == u'j' || cp == 0x131 || cp == 0x237 || cp == u'l' ||
            u_hasBinaryProperty(cp, UCHAR_SOFT_DOTTED);
 }
 
