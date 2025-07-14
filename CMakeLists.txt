@@ -6,6 +6,7 @@ project(ICU VERSION 77.1 LANGUAGES CXX)
 file(GLOB_RECURSE ICU_SOURCES
   "common/*.cpp"
   "i18n/*.cpp"
+  "icudata.gen.cpp"
 )
 
 # Create static library
@@ -45,6 +46,7 @@ target_compile_definitions(uc
     "U_LIB_SUFFIX_C_NAME=_lxe"
     "U_SHOW_CPLUSPLUS_API=1"
     "U_SHOW_CPLUSPLUS_HEADER_API=1"
+    "ICU_STATIC_DATA"
 )
 
 # Create an export set for the target

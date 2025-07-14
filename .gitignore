@@ -45,3 +45,4 @@ CMakeLists.txt.user
 /docs/xml
 .DS_Store
 /temp
+*.dat

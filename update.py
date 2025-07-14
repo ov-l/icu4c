@@ -1,111 +1,110 @@
 
-# update from icu/icu4c directory
-# - The `common` folder
-# - `scriptset.*`, `ucln_in.*`, `uspoof.cpp"` and `uspoof_impl.cpp` from the `i18n` folder
-# - `uspoof.h` from the `i18n/unicode` folder
-# - `LICENSE` file 
-
+from __future__ import annotations
+import argparse
 import os
 import shutil
+import subprocess
 import sys
+import textwrap
+from pathlib import Path
 
 
 
-def download_icu4c(version):
-    # Create a temp directory and change to temp directory
-    os.makedirs('temp', exist_ok=True)
-    os.chdir('temp')    
-    dash_version = version.replace('.', '-')
-    uscore_version = version.replace('.', '_')
-    major_version = version.split('.')[0]
+def cpp_byte_array(name: str, blob: bytes, indent: int = 2,
+                   line_width: int = 120) -> str:
+    """Return *blob* formatted as a C array initialiser."""
+    hex_bytes = [str(b) for b in blob]
+    joined    = ", ".join(hex_bytes)
+    wrapper   = textwrap.TextWrapper(width=line_width,
+                                     initial_indent=" " * indent,
+                                     subsequent_indent=" " * indent)
+    return wrapper.fill(joined)
+
+
+SUBSET_FILES = [
+    "i18n/scriptset.cpp",
+    "i18n/scriptset.h",
+    "i18n/ucln_in.cpp",
+    "i18n/ucln_in.h",
+    "i18n/uspoof.cpp",
+    "i18n/uspoof_impl.cpp",
+    "i18n/uspoof_impl.h",
+    "i18n/unicode/uspoof.h",
+]
+
+def vendor_headers_and_sources(icu_source: Path, dest_root: Path) -> None:
+    """
+    Copy the subset of ICU headers/sources required by your engine into *dest_root*.
+    """
+    print("→ Vendoring selected headers / sources")
+
+    # 1. Entire common/
+    shutil.copytree(icu_source / "common", dest_root / "common",
+                    dirs_exist_ok=True)
+
+    # 2. Individual files from i18n/
+    for rel in SUBSET_FILES:
+        src = icu_source / rel
+        dst = dest_root / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+
+    # 3. Top-level LICENSE
+    shutil.copy2(icu_source.parent / "LICENSE", dest_root)
     
-    url = f'https://github.com/unicode-org/icu/releases/download/release-{dash_version}/icu4c-{uscore_version}-src.tgz'
-    os.system(f'wget {url}')
-    os.system(f'tar -xzf icu4c-{uscore_version}-src.tgz')
-    data_url = f'https://github.com/unicode-org/icu/releases/download/release-{dash_version}/icu4c-{uscore_version}-data.zip'
-    os.system(f'wget {data_url}')
-    os.system(f'unzip icu4c-{uscore_version}-data.zip')
-    # Copy data from the unzipped data folder to icu4c/source/data folder and overwrite all existing data files
-    os.system(f'cp -r data/* icu/source/data/')
-    # runCOnfigureICU
-    os.system(f'./icu/source/runConfigureICU Linux')
-    os.system(f'make')
-    os.system(f'ICU_DATA_FILTER_FILE=../u_data.json ./icu/source/runConfigureICU Linux --with-data-packaging=common')
-    os.system(f'rm -rf ./data/out')
-    os.system(f'make')
-    os.system(f'cp -r ./data/out/icudt{major_version}l.dat ../')
-    os.system('cd ..')
 
+def embed_dat_as_cpp(dat_path: Path, dest_cpp: Path) -> None:
+    """
+    Generate a single C++ translation unit with the binary data embedded
+    as an `unsigned char[]`.
+    """
+    blob = dat_path.read_bytes()
+    array = cpp_byte_array("U_ICUDATA_ENTRY_POINT", blob)
 
-# Create list of files to copy
-files = ['i18n/scriptset.cpp', 
-         'i18n/scriptset.h', 
-         'i18n/ucln_in.cpp', 
-         'i18n/ucln_in.h', 
-         'i18n/uspoof.cpp', 
-         'i18n/uspoof_impl.h',
-         'i18n/uspoof_impl.cpp',
-         'i18n/unicode/uspoof.h']
+    dest_cpp.write_text(textwrap.dedent(f"""\
+        /* (C) 2016 and later: Unicode, Inc. and others.
+           License & terms of use: https://www.unicode.org/copyright.html */
+        #include <unicode/utypes.h>
+        #include <unicode/udata.h>
 
-def update_icu4c(icu4c_dir, output_dir):
-    common_dir = os.path.join(icu4c_dir, 'common')
-    i18n_dir = os.path.join(icu4c_dir, 'i18n')
-    unicode_dir = os.path.join(i18n_dir, 'unicode')
-
-    output_common_dir = os.path.join(output_dir, 'common')
-    output_i18n_dir = os.path.join(output_dir, 'i18n')
-    output_unicode_dir = os.path.join(output_i18n_dir, 'unicode')
-
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    # Copy tree, but update the destination if it already exists
+        extern "C" U_EXPORT const size_t U_ICUDATA_SIZE = {len(blob)};
+        extern "C" U_EXPORT const unsigned char U_ICUDATA_ENTRY_POINT[] = {{
+        {array}
+        }};
+        """))
+    print(f"✓ Embedded data         → {dest_cpp}")
     
-    shutil.copytree(common_dir, output_common_dir, dirs_exist_ok=True)
-
-    os.makedirs(output_i18n_dir, exist_ok=True)
-
-    os.makedirs(output_unicode_dir, exist_ok=True)
-
-    for file in files:
-        dest_file = os.path.join(output_dir, file)
-        os.makedirs(os.path.dirname(dest_file), exist_ok=True)
-        shutil.copy(os.path.join(icu4c_dir, file), dest_file)
-
-    shutil.copy(os.path.join(icu4c_dir, '..', 'LICENSE'), output_dir)
-
-
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('Usage: python update.py <version>')
-        sys.exit(1)
-
-    version = sys.argv[1]
-
-    output_dir = os.getcwd()
-    icu4c_dir = f'{output_dir}/temp/icu/source'
-
-    download_icu4c(version)
-
-    if not os.path.exists(icu4c_dir):
-        print(f'Error: {icu4c_dir} does not exist')
-        sys.exit(1)
     
-    update_icu4c(icu4c_dir, output_dir)
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    p.add_argument("--dat-path", type=Path, default=Path("icudt77l.dat"),
+                   help="Data file path")
+    p.add_argument("--engine-root", type=Path, default=Path("./"),
+                   help="Where to copy headers, sources and .dat")
+    return p.parse_args()
 
-    os.system('rm -rf temp')
 
-    print('Done updating ICU4C')
+def main() -> None:
+    args = parse_args()
+    dest_root: Path = args.engine_root.resolve()
+    dest_root.mkdir(parents=True, exist_ok=True)
+    
+    dat_path: Path = args.dat_path.resolve()
 
-    cmake_lists_path = os.path.join(output_dir, 'CMakeLists.txt')
+    # ------------------------------------------------------------------ vendor sources
+    # (re-use the build tree for file copying; it’s still around)
+    icu_src = Path("temp/icu/source").resolve()
+    vendor_headers_and_sources(icu_src, dest_root)
 
-    # Open current CMakeLists.txt and update the version
-    with open(cmake_lists_path, 'r') as file:
-        lines = file.readlines()
+    # ------------------------------------------------------------------ optional C++ embed
+    embed_dat_as_cpp(dat_path, dest_root / "icudata.gen.cpp")
 
-    with open(cmake_lists_path, 'w') as file:
-        for line in lines:
-            if 'project(ICU VERSION' in line:
-                file.write(f'project(ICU VERSION {version} LANGUAGES CXX)\n')
-            else:
-                file.write(line)
+    print("\n🎉  ICU update complete!")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except subprocess.CalledProcessError as exc:
+        sys.stderr.write(f"\n❌ Command failed: {exc.cmd}\n")
+        sys.exit(exc.returncode)    
